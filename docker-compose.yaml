@@ -1,0 +1,169 @@
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: Dockerfile.airflow
+  user: "0:0"
+  environment: &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${AIRFLOW_DB}
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
+    # dbt connection info available to Airflow DAGs
+    DBT_POSTGRES_HOST: postgres
+    DBT_POSTGRES_PORT: 5432
+    DBT_POSTGRES_DB: ${DWH_DB}
+    DBT_POSTGRES_USER: ${POSTGRES_USER}
+    DBT_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/logs:/opt/airflow/logs
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./data:/opt/airflow/data
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./dbt:/opt/airflow/dbt          # mount dbt project into airflow so it can trigger runs
+  depends_on:
+    postgres:
+      condition: service_healthy
+  networks:
+    - elt_network
+
+services:
+
+  # ──────────────────────────────────────────────
+  # POSTGRES — single instance, two databases
+  # ──────────────────────────────────────────────
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${AIRFLOW_DB}        # default db created on first boot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # creates data warehouse db
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - elt_network
+
+  # ──────────────────────────────────────────────
+  # PGADMIN — database GUI
+  # ──────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - elt_network
+
+  # ──────────────────────────────────────────────
+  # AIRFLOW — init (runs once to set up metadata DB + admin user)
+  # ──────────────────────────────────────────────
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate
+        airflow users create \
+          --username ${AIRFLOW_ADMIN_USER} \
+          --password ${AIRFLOW_ADMIN_PASSWORD} \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email ${AIRFLOW_ADMIN_EMAIL}
+    restart: on-failure
+    networks:
+      - elt_network
+
+  # ──────────────────────────────────────────────
+  # AIRFLOW — webserver
+  # ──────────────────────────────────────────────
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    restart: unless-stopped
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  # ──────────────────────────────────────────────
+  # AIRFLOW — scheduler
+  # ──────────────────────────────────────────────
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    restart: unless-stopped
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  # ──────────────────────────────────────────────
+  # DBT — runs as a service, triggered by Airflow
+  # ──────────────────────────────────────────────
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.9.latest
+    container_name: dbt
+    restart: "no"               # dbt runs on-demand, not as a daemon
+    working_dir: /usr/app/dbt/my_project
+    volumes:
+      - ./dbt:/usr/app/dbt      # your dbt project lives here
+    environment:
+      DBT_POSTGRES_HOST: postgres
+      DBT_POSTGRES_PORT: 5432
+      DBT_POSTGRES_DB: ${DWH_DB}
+      DBT_POSTGRES_USER: ${POSTGRES_USER}
+      DBT_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DBT_POSTGRES_SCHEMA: ${DBT_SCHEMA}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - elt_network
+
+# ──────────────────────────────────────────────
+# VOLUMES & NETWORKS
+# ──────────────────────────────────────────────
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  elt_network:
+    driver: bridge

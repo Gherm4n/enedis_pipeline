@@ -1,0 +1,6 @@
+.env
+dbt/my_project/profiles.yml
+airflow/logs/
+data/
+__pycache__/
+*.pyc

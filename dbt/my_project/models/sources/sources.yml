@@ -1,0 +1,7 @@
+sources:
+    - name: staging
+      database: data_warehouse
+      schema: staging
+      tables:
+        - name: staging
+        - name: rte_spot_prices
