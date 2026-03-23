@@ -1,6 +1,6 @@
 x-airflow-common: &airflow-common
   build:
-    context: .
+    context: energy_pipeline/
     dockerfile: Dockerfile.airflow
   user: "0:0"
   environment: &airflow-common-env
@@ -16,12 +16,12 @@ x-airflow-common: &airflow-common
     DBT_POSTGRES_USER: ${POSTGRES_USER}
     DBT_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   volumes:
-    - ./airflow/dags:/opt/airflow/dags
-    - ./airflow/logs:/opt/airflow/logs
-    - ./airflow/plugins:/opt/airflow/plugins
-    - ./data:/opt/airflow/data
+    - ./energy_pipeline/airflow/dags:/opt/airflow/dags
+    - ./energy_pipeline/airflow/logs:/opt/airflow/logs
+    - ./energy_pipeline/airflow/plugins:/opt/airflow/plugins
+    - ./energy_pipeline/data:/opt/airflow/data
     - /var/run/docker.sock:/var/run/docker.sock
-    - ./dbt:/opt/airflow/dbt          # mount dbt project into airflow so it can trigger runs
+    - ./energy_pipeline/dbt:/opt/airflow/dbt
   depends_on:
     postgres:
       condition: service_healthy
@@ -40,10 +40,10 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${AIRFLOW_DB}        # default db created on first boot
+      POSTGRES_DB: ${AIRFLOW_DB}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # creates data warehouse db
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./energy_pipeline/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # creates data warehouse db
     ports:
       - "5432:5432"
     healthcheck:
@@ -70,7 +70,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin_data:/var/lib/pgadmin
     networks:
       - elt_network
 
