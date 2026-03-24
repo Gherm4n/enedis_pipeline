@@ -6,8 +6,4 @@ RUN pip install --no-cache-dir \
     httpx \
     tenacity \
     apache-airflow-providers-postgres \
-    apache-airflow-providers-docker \
-    playwright
-
-RUN playwright install chromium && \
-    playwright install-deps chromium
+    apache-airflow-providers-docker
