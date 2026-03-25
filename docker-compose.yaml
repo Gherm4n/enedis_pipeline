@@ -9,7 +9,6 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
-    # dbt connection info available to Airflow DAGs
     DBT_POSTGRES_HOST: postgres
     DBT_POSTGRES_PORT: 5432
     DBT_POSTGRES_DB: ${DWH_DB}
@@ -22,7 +21,7 @@ x-airflow-common: &airflow-common
     - ./airflow/plugins:/opt/airflow/plugins
     - ./data:/opt/airflow/data
     - /var/run/docker.sock:/var/run/docker.sock
-    - ./dbt:/opt/airflow/dbt          # mount dbt project into airflow so it can trigger runs
+    - ./dbt:/opt/airflow/dbt
   depends_on:
     postgres:
       condition: service_healthy
@@ -31,9 +30,7 @@ x-airflow-common: &airflow-common
 
 services:
 
-  # ──────────────────────────────────────────────
-  # POSTGRES — single instance, two databases
-  # ──────────────────────────────────────────────
+
   postgres:
     image: postgres:15
     container_name: postgres
@@ -41,10 +38,10 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${AIRFLOW_DB}        # default db created on first boot
+      POSTGRES_DB: ${AIRFLOW_DB}      
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # creates data warehouse db
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - "5432:5432"
     healthcheck:
@@ -55,9 +52,6 @@ services:
     networks:
       - elt_network
 
-  # ──────────────────────────────────────────────
-  # PGADMIN — database GUI
-  # ──────────────────────────────────────────────
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
@@ -75,9 +69,6 @@ services:
     networks:
       - elt_network
 
-  # ──────────────────────────────────────────────
-  # AIRFLOW — init (runs once to set up metadata DB + admin user)
-  # ──────────────────────────────────────────────
   airflow-init:
     <<: *airflow-common
     container_name: airflow-init
@@ -97,9 +88,6 @@ services:
     networks:
       - elt_network
 
-  # ──────────────────────────────────────────────
-  # AIRFLOW — webserver
-  # ──────────────────────────────────────────────
   airflow-webserver:
     <<: *airflow-common
     container_name: airflow-webserver
@@ -117,9 +105,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  # ──────────────────────────────────────────────
-  # AIRFLOW — scheduler
-  # ──────────────────────────────────────────────
+
   airflow-scheduler:
     <<: *airflow-common
     container_name: airflow-scheduler
@@ -135,16 +121,14 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  # ──────────────────────────────────────────────
-  # DBT — runs as a service, triggered by Airflow
-  # ──────────────────────────────────────────────
+
   dbt:
     image: ghcr.io/dbt-labs/dbt-postgres:1.9.latest
     container_name: dbt
-    restart: "no"               # dbt runs on-demand, not as a daemon
+    restart: "no"   
     working_dir: /usr/app/dbt/my_project
     volumes:
-      - ./dbt:/usr/app/dbt      # your dbt project lives here
+      - ./dbt:/usr/app/dbt      
     environment:
       DBT_POSTGRES_HOST: postgres
       DBT_POSTGRES_PORT: 5432
@@ -158,9 +142,6 @@ services:
     networks:
       - elt_network
 
-# ──────────────────────────────────────────────
-# VOLUMES & NETWORKS
-# ──────────────────────────────────────────────
 volumes:
   postgres_data:
   pgadmin_data:
