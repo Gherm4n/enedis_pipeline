@@ -136,7 +136,6 @@ def save_batch_to_bronze(batch):
         conn = postgres_hook.get_conn()
         cursor = conn.cursor()
 
-        # Create schema and table if not exists
         cursor.execute("""
         CREATE SCHEMA IF NOT EXISTS staging;
         """)
@@ -153,7 +152,6 @@ def save_batch_to_bronze(batch):
         VALUES (%s);
         """
 
-        # insert batch of rows
         cursor.executemany(
             insert_query,
             [(json.dumps(row),) for row in batch]
@@ -198,18 +196,15 @@ async def main():
             if current_horodate and (not max_horodate or current_horodate > max_horodate):
                 max_horodate = current_horodate
 
-            # Stop after batch_size rows
             if len(batch) >= batch_size:
                 save_batch_to_bronze(batch)
                 logger.info(f"Batch of {batch_size} rows saved. Stopping fetch for now.")
                 break
         
-        # Save smaller final batch if exists
         if batch and len(batch) < batch_size:
             save_batch_to_bronze(batch)
             logger.info(f"Final batch of {len(batch)} rows saved.")
 
-        # Save checkpoint
         if max_horodate and max_horodate != last_horodate:
             save_checkpoint(max_horodate)
 
