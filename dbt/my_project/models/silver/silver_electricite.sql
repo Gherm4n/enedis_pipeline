@@ -1,5 +1,5 @@
 with bronze as (
-    select * from {{ ref('bronze_data') }}
+    select * from {{ ref('bronze_electricite') }}
 ),
 
 silver as (

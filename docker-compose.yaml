@@ -15,6 +15,7 @@ x-airflow-common: &airflow-common
     DBT_POSTGRES_DB: ${DWH_DB}
     DBT_POSTGRES_USER: ${POSTGRES_USER}
     DBT_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ENTSOE_API_KEY: ${ENTSOE_API_KEY}
   volumes:
     - ./airflow/dags:/opt/airflow/dags
     - ./airflow/logs:/opt/airflow/logs

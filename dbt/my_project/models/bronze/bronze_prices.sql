@@ -10,6 +10,6 @@ with source as (
 select
     timestamp,
     price_eur_mwh,
-    source_date,
-    periode
+    resolution,
+    position
 from source

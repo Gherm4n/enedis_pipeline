@@ -9,18 +9,14 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-# -----------------------------
-# Logging
-# -----------------------------
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
-# -----------------------------
-# Constants
-# -----------------------------
+
 BASE_URL = "https://opendata.enedis.fr/data-fair/api/v1/datasets/bilan-electrique-demi-heure/"
 HEADERS = {"Accept": "application/json"}
 RATE_LIMIT = AsyncLimiter(max_rate=600, time_period=1)
@@ -37,9 +33,7 @@ DATA_DIR = Path("/opt/airflow/data")
 CHECKPOINT_FILE = DATA_DIR / "checkpoint.json"
 API_DATA_SCHEMA = DATA_DIR / "schema.json"
 
-# -----------------------------
-# Checkpoint utilities
-# -----------------------------
+
 def get_checkpoint() -> Optional[str]:
     if CHECKPOINT_FILE.exists():
         try:
@@ -58,18 +52,14 @@ def save_checkpoint(horodate: str):
     except Exception as e:
         logger.error(f"Failed to save checkpoint: {e}")
 
-# -----------------------------
-# HTTP logging hooks
-# -----------------------------
+
 async def log_request(request: httpx.Request):
     logger.debug(f"Request event hook: {request.method} - {request.url}")
 
 async def log_response(response: httpx.Response):
     logger.debug(f"Response Status Code: {response.status_code}")
 
-# -----------------------------
-# Schema fetch
-# -----------------------------
+
 @retry(
     retry=(retry_if_exception(httpx.HTTPStatusError) | retry_if_exception(httpx.RequestError)),
     stop=stop_after_attempt(5),
@@ -91,9 +81,7 @@ async def get_schema(client: httpx.AsyncClient, base_url):
     else:
         logger.info("Schema already provided")
 
-# -----------------------------
-# Fetch data generator
-# -----------------------------
+
 async def fetch_data(base_url: str, last_horodate: Optional[str] = None):
     params = {"sort": "horodate"}
     if last_horodate:
@@ -131,9 +119,7 @@ async def fetch_data(base_url: str, last_horodate: Optional[str] = None):
                 except Exception as e:
                     raise e
 
-# -----------------------------
-# Save to Postgres safely
-# -----------------------------
+
 def save_batch_to_bronze(batch):
 
     if not batch:
@@ -192,9 +178,7 @@ def save_batch_to_bronze(batch):
         if conn:
             conn.close()
 
-# -----------------------------
-# Main pipeline (batch-limited)
-# -----------------------------
+
 async def main():
     last_horodate = get_checkpoint()
     if last_horodate:
@@ -235,9 +219,7 @@ async def main():
         logger.error(f"Pipeline failed: {e}")
         raise
 
-# -----------------------------
-# Entry point
-# -----------------------------
+
 def fetch():
     asyncio.run(main())
 

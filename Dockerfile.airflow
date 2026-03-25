@@ -1,13 +1,8 @@
 FROM apache/airflow:2.9.1
 
-# Install custom Python dependencies
 RUN pip install --no-cache-dir \
     aiolimiter \
     httpx \
     tenacity \
     apache-airflow-providers-postgres \
-    apache-airflow-providers-docker \
-    playwright
-
-RUN playwright install chromium && \
-    playwright install-deps chromium
+    apache-airflow-providers-docker
