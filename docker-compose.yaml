@@ -1,7 +1,7 @@
 x-airflow-common: &airflow-common
   build:
     context: .
-    dockerfile: Dockerfile.airflow
+    dockerfile: ./data_pipeline/Dockerfile.airflow
   user: "0:0"
   environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
@@ -16,12 +16,12 @@ x-airflow-common: &airflow-common
     DBT_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ENTSOE_API_KEY: ${ENTSOE_API_KEY}
   volumes:
-    - ./airflow/dags:/opt/airflow/dags
-    - ./airflow/logs:/opt/airflow/logs
-    - ./airflow/plugins:/opt/airflow/plugins
-    - ./data:/opt/airflow/data
+    - ./data_pipeline/airflow/dags:/opt/airflow/dags
+    - ./data_pipeline/airflow/plugins:/opt/airflow/plugins
+    - ./data_pipeline/airflow/logs:/opt/airflow/logs
+    - ./data_pipeline/data:/opt/airflow/data
     - /var/run/docker.sock:/var/run/docker.sock
-    - ./dbt:/opt/airflow/dbt
+    - ./data_pipeline/dbt:/opt/airflow/dbt
   depends_on:
     postgres:
       condition: service_healthy
@@ -29,7 +29,6 @@ x-airflow-common: &airflow-common
     - elt_network
 
 services:
-
 
   postgres:
     image: postgres:15
@@ -41,7 +40,7 @@ services:
       POSTGRES_DB: ${AIRFLOW_DB}      
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./data_pipeline/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
       - "5432:5432"
     healthcheck:
@@ -128,7 +127,7 @@ services:
     restart: "no"   
     working_dir: /usr/app/dbt/my_project
     volumes:
-      - ./dbt:/usr/app/dbt      
+      - ./data_pipeline/dbt:/usr/app/dbt      
     environment:
       DBT_POSTGRES_HOST: postgres
       DBT_POSTGRES_PORT: 5432

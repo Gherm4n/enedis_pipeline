@@ -1,4 +1,5 @@
 .env
-data/
+airflow/logs/
+dbt/logs
 __pycache__/
 *.pyc
