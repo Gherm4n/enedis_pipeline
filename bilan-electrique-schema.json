@@ -1,0 +1,231 @@
+{
+    "type": "object",
+    "required": [],
+    "properties": {
+        "horodate": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Horodate",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113135
+        },
+        "mois": {
+            "title": "Mois",
+            "type": "string",
+            "x-capabilities": {},
+            "description": "",
+            "x-cardinality": 12,
+            "examples": [
+                "01",
+                "12",
+                "10",
+                "03",
+                "11",
+                "02",
+                "05",
+                "07",
+                "08",
+                "04",
+                "06",
+                "09"
+            ]
+        },
+        "injection_rte": {
+            "type": "number",
+            "title": "Puissance moyenne de l'injection RTE (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113959
+        },
+        "soutirage_rte": {
+            "type": "number",
+            "title": "Puissance moyenne du refoulement RTE (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113427
+        },
+        "soutirage_vers_autres_grd": {
+            "title": "Puissance moyenne du soutirage net vers autres GRD (W)",
+            "type": "number",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 114178
+        },
+        "pertes": {
+            "type": "number",
+            "title": "Puissance moyenne des pertes modélisées (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 112939
+        },
+        "consommation_totale": {
+            "type": "number",
+            "title": "Puissance moyenne des consommations totales (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113367
+        },
+        "consommation_hta": {
+            "title": "Puissance moyenne de la consommation totale HTA (W)",
+            "type": "number",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113736
+        },
+        "consommation_telerelevee_hta": {
+            "type": "number",
+            "title": "Puissance moyenne de la consommation télérelevée HTA (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 114895
+        },
+        "consommation_telerelevee_btsup": {
+            "type": "number",
+            "title": "Puissance moyenne de la consommation télérelevée BT SUP 36 (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 114802
+        },
+        "consommation_telerelevee_professionnelle": {
+            "type": "number",
+            "title": "Puissance moyenne de la consommation télérelevée BT INF 36 Professionelle (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113542
+        },
+        "consommation_telerelevee_residentielle": {
+            "type": "number",
+            "title": "Puissance moyenne de la consommation télérelevée BT INF 36 Résidentielle (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113184
+        },
+        "consommation_profilee_ent_hta": {
+            "type": "number",
+            "title": "Puissance moyenne de la consommation profilée HTA (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 114050
+        },
+        "consommation_profilee_ent_bt": {
+            "type": "number",
+            "title": "Puissance moyenne de la consommation profilée BT SUP 36 (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113447
+        },
+        "consommation_profilee_pro": {
+            "type": "number",
+            "title": "Puissance moyenne de la consommation profilée BT INF 36 Professionelle (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 112616
+        },
+        "consommation_profilee_res": {
+            "type": "number",
+            "title": "Puissance moyenne de la consommation profilée BT INF 36 Résidentielle (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113865
+        },
+        "production_totale": {
+            "type": "number",
+            "title": "Puissance moyenne de la production totale (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 114393
+        },
+        "production_telerelevee": {
+            "type": "number",
+            "title": "Puissance moyenne de la production télérelevée totale (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 114156
+        },
+        "production_profilee": {
+            "type": "number",
+            "title": "Puissance moyenne de la production profilée totale (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 111273
+        },
+        "production_photovoltaique": {
+            "type": "number",
+            "title": "Puissance moyenne de la production photovoltaïque totale (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 112631
+        },
+        "production_eolien": {
+            "type": "number",
+            "title": "Puissance moyenne de la production éolienne totale (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113938
+        },
+        "production_cogeneration": {
+            "type": "number",
+            "title": "Puissance moyenne de la production cogénération totale (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113399
+        },
+        "production_autre": {
+            "title": "Puissance moyenne de la production autres totale (W)",
+            "type": "number",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 113133
+        },
+        "production_profilee_photovoltaique": {
+            "type": "number",
+            "title": "Puissance moyenne de la production photovoltaïque profilée (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 108195
+        },
+        "production_profilee_cogeneration": {
+            "type": "number",
+            "title": "Puissance moyenne de la production cogénération profilée (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 39024
+        },
+        "production_profilee_hydraulique": {
+            "type": "number",
+            "title": "Puissance moyenne de la production hydraulique profilée (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 61296
+        },
+        "production_profilee_aut": {
+            "type": "number",
+            "title": "Puissance moyenne de la production autres profilée (W)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 1804
+        },
+        "temperature_reelle_lissee": {
+            "type": "number",
+            "title": "Température réalisée lissée (°C)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 320
+        },
+        "temperature_normale_lissee": {
+            "type": "number",
+            "title": "Température normale lissée (°C)",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 194
+        },
+        "pseudo_rayonnement": {
+            "type": "string",
+            "title": "Pseudo rayonnement",
+            "description": "",
+            "x-capabilities": {},
+            "x-cardinality": 102
+        }
+    }
+}
