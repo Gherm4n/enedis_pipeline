@@ -141,6 +141,28 @@ services:
     networks:
       - elt_network
 
+  dashboard:
+    build:
+      context: ./data_dashboard
+      dockerfile: Dockerfile
+    container_name: dashboard
+    restart: unless-stopped
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./data_analytics/data/processed:/app/data/processed
+    environment:
+      - DATA_PATH=/app/data/processed
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${DWH_DB}
+      - POSTGRES_HOST=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - elt_network
+
 volumes:
   postgres_data:
   pgadmin_data:

@@ -1,8 +1,11 @@
+import os
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.docker.operators.docker import DockerOperator
 from datetime import datetime, timedelta
 from fetch_enedis import fetch
+
+HOST_PROJECT_PATH = os.getenv("HOST_PROJECT_PATH", "/home/klein/enedis_pipeline")
 
 default_args = {
     "owner": "airflow",
@@ -12,7 +15,7 @@ default_args = {
 
 DBT_IMAGE = "ghcr.io/dbt-labs/dbt-postgres:1.9.latest"
 DBT_MOUNT = {
-    "source": "/home/klein/enedis_pipeline/dbt",
+    "source": f"{HOST_PROJECT_PATH}/data_pipeline/dbt",
     "target": "/usr/app/dbt",
     "type": "bind"
 }
