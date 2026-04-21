@@ -1,0 +1,8 @@
+dash
+plotly
+pandas
+polars
+pyarrow
+dash-bootstrap-components
+sqlalchemy
+psycopg2-binary

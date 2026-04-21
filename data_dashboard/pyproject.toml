@@ -1,0 +1,22 @@
+[project]
+name = "data_dashboard"
+version = "0.1.0"
+description = "Interactive dashboard for Enedis energy data"
+dependencies = [
+    "dash",
+    "plotly",
+    "pandas",
+    "polars",
+    "pyarrow",
+    "dash-bootstrap-components",
+    "sqlalchemy",
+    "psycopg2-binary",
+]
+requires-python = ">=3.12"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
